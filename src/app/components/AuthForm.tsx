@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,42 +25,65 @@ export default function AuthForm() {
     const data = await response.json();
     if (data.success) {
       if (isLogin) {
-        // Store user info in localStorage or context
         localStorage.setItem('user', JSON.stringify({ id: data.userId, username: data.username }));
         router.push('/chatrooms');
       } else {
         setIsLogin(true);
+        toast({
+          title: "Registration successful",
+          description: "You can now log in with your new account.",
+        });
       }
     } else {
-      alert(data.message);
+      toast({
+        title: "Error",
+        description: data.message,
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        placeholder="Username"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        required
-        className="w-full p-2 border rounded"
-      />
-      <button type="submit" className="w-full p-2 bg-blue-500 text-white rounded">
-        {isLogin ? 'Login' : 'Register'}
-      </button>
-      <button type="button" onClick={() => setIsLogin(!isLogin)} className="w-full p-2 text-blue-500">
-        {isLogin ? 'Need to register?' : 'Already have an account?'}
-      </button>
-    </form>
+    <Card>
+      <CardHeader>
+        <CardTitle>{isLogin ? 'Login' : 'Register'}</CardTitle>
+        <CardDescription>
+          {isLogin ? 'Enter your credentials to access your account.' : 'Create a new account to get started.'}
+        </CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-4">
+          <Button type="submit" className="w-full">
+            {isLogin ? 'Login' : 'Register'}
+          </Button>
+          <Button type="button" variant="link" onClick={() => setIsLogin(!isLogin)} className="w-full">
+            {isLogin ? 'Need to register?' : 'Already have an account?'}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }
 

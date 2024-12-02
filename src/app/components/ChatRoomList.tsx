@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 interface ChatRoom {
   id: number;
@@ -15,6 +17,14 @@ export default function ChatRoomList() {
 
   useEffect(() => {
     fetchChatRooms();
+
+    // Create a custom event listener for room creation
+    const handleRoomCreated = () => fetchChatRooms();
+    window.addEventListener('roomCreated', handleRoomCreated);
+
+    return () => {
+      window.removeEventListener('roomCreated', handleRoomCreated);
+    };
   }, [search]);
 
   const fetchChatRooms = async () => {
@@ -24,25 +34,30 @@ export default function ChatRoomList() {
   };
 
   return (
-    <div className="space-y-4">
-      <input
-        type="text"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search chat rooms"
-        className="w-full p-2 border rounded"
-      />
-      <ul className="space-y-2">
-        {chatRooms.map((room) => (
-          <li key={room.id} className="border p-2 rounded">
-            <Link href={`/chatroom/${room.id}`}>
-              <h3 className="font-bold">{room.name}</h3>
-              <p className="text-sm text-gray-600">{room.description}</p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Chat Rooms</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search chat rooms"
+          className="mb-4"
+        />
+        <ul className="space-y-2">
+          {chatRooms.map((room) => (
+            <li key={room.id}>
+              <Link href={`/chatroom/${room.id}`} className="block p-3 rounded-lg hover:bg-accent">
+                <h3 className="font-semibold">{room.name}</h3>
+                <p className="text-sm text-muted-foreground">{room.description}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
 

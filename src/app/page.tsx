@@ -15,9 +15,9 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-4 text-center">Chat Room App</h1>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-md">
+        <h1 className="text-3xl font-bold mb-6 text-center">Chat Room App</h1>
         <AuthForm />
       </div>
     </div>

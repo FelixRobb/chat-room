@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
      WHERE followers.followed_id = (SELECT id FROM users WHERE username = ?)`,
     [username]
   );
-  return NextResponse.json(followers.map(f => f.username));
+  return NextResponse.json(followers.map((f: any) => f.username));
 }
 
 export async function POST(req: NextRequest) {
@@ -32,6 +32,27 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Error following user:', error);
     return NextResponse.json({ error: 'Failed to follow user' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const { followerId, followedUsername } = await req.json();
+  const db = await getDb();
+  const followedUser = await db.get('SELECT id FROM users WHERE username = ?', [followedUsername]);
+  
+  if (!followedUser) {
+    return NextResponse.json({ error: 'User not found' }, { status: 404 });
+  }
+
+  try {
+    await db.run(
+      'DELETE FROM followers WHERE follower_id = ? AND followed_id = ?',
+      [followerId, followedUser.id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error unfollowing user:', error);
+    return NextResponse.json({ error: 'Failed to unfollow user' }, { status: 500 });
   }
 }
 
